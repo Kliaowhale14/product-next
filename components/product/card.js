@@ -1,24 +1,22 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import Link from 'next/link';
 
-export default function Card() {
-  // const [productCard, setProductcard] = useState({
+const Card = () => {
+  const [card, setCard] = useState([]);
 
-  // })
   return (
     <>
-      <div className="card">
-        <img
-          src="img/img1.jpg"
-          className=""
-          alt=""
-          width={230}
-          height={200}
-        ></img>
-        <div className="">
-          <h5>card title</h5>
-          <p>card text</p>
+      <Link href={`/product`}>
+        <div className="card" style={{ width: 200, display: 'inline-block' }}>
+          <img src="img/img1.jpg" className="card-img-top" alt="..." />
+          <div className="card-body">
+            <p className="card-text ">Title</p>
+            <p className="card-text">Price</p>
+          </div>
         </div>
-      </div>
+      </Link>
     </>
   );
-}
+};
+
+export default Card;
