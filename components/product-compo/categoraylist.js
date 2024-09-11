@@ -6,18 +6,33 @@ export default function Categoraylist() {
     <>
       <ul className="categoraylist">
         <li>
-          <Link href="/" className="linkStyle">
+          <Link href="/" style={{ color: '#f4772f', textDecoration: 'none' }}>
             所有商品
           </Link>
         </li>
         <li>
-          <Link href="/limit">季節限定</Link>
+          <Link
+            href="/limit"
+            style={{ color: '#f4772f', textDecoration: 'none' }}
+          >
+            季節限定
+          </Link>
         </li>
         <li>
-          <Link href="/gift">送禮推薦</Link>
+          <Link
+            href="/gift"
+            style={{ color: '#f4772f', textDecoration: 'none' }}
+          >
+            送禮推薦
+          </Link>
         </li>
         <li>
-          <Link href="/sale">特價專區</Link>
+          <Link
+            href="/sale"
+            style={{ color: '#f4772f', textDecoration: 'none' }}
+          >
+            特價專區
+          </Link>
         </li>
       </ul>
       <style jsx>{`
@@ -29,6 +44,7 @@ export default function Categoraylist() {
         .categoraylist li {
           padding: 20px;
         }
+
         .linkStyle {
           color: #f4772f;
           text-decoration: none;
