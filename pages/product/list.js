@@ -3,6 +3,7 @@ import Link from 'next/link';
 import ProductCard from '@/components/product-compo/productcard';
 import Categoraylist from '@/components/product-compo/categoraylist';
 
+
 // 有名稱的路由(巢狀路由)
 export default function List() {
   // 商品物件陣列狀態
@@ -13,13 +14,15 @@ export default function List() {
   const [pageCount, setPageCount] = useState(0); //總頁數
 
   // 查詢條件用(這裡用的初始值都與伺服器的預設值一致)
-  const [nameLike, setNameLike] = useState('');
+  const [name_like, setNameLike] = useState('');
   const [country, setCountry] = useState([]); // 字串陣列
-  // const [breed, setBreed] = useState([]); // 字串陣列
-  // const [roast, setRoast] = useState([]); // 字串陣列
-  // const [process, setProcess] = useState([]); // 字串陣列
-  const [priceGte, setPriceGte] = useState(0);
-  const [priceLte, setPriceLte] = useState(4000);
+  const [breeds, setBreeds] = useState([]); // 字串陣列
+  const [process, setProcess] = useState([]); // 字串陣列
+  const [roast, setRoast] = useState([]); // 字串陣列
+
+  const [price_gte, setPriceGte] = useState(0);
+  const [price_lte, setPriceLte] = useState(4000);
+
 
   // 品牌選項陣列
   const countryOptions = [
@@ -33,17 +36,17 @@ export default function List() {
     '巴西',
     '祕魯',
   ];
-  // const breedsOptions = ['阿拉比卡', '卡杜拉', '藝妓', '帝比卡'];
+  const breedsOptions = ['阿拉比卡', '卡杜拉', '藝妓', '帝比卡'];
 
-  // const processOptions = [
-  //   '水洗處理',
-  //   '日曬處理',
-  //   '半水洗處理',
-  //   '半日曬處理',
-  //   '葡萄乾蜜處理',
-  // ];
+  const processOptions = [
+    '水洗處理',
+    '日曬處理',
+    '半水洗處理',
+    '半日曬處理',
+    '葡萄乾蜜處理',
+  ];
 
-  // const roastOptions = ['深烘焙', '中烘焙', '淺烘焙'];
+  const roastOptions = ['深烘焙', '中烘焙', '淺烘焙'];
 
   // 排序
   const [sort, setSort] = useState('p_id');
@@ -98,20 +101,69 @@ export default function List() {
     }
   };
 
+  //品種複選
+  const handleBreedChecked = (e) => {
+    // 宣告方便使用的tv名稱，取得觸發事件物件的目標值
+    const tv = e.target.value;
+    // 判斷是否有在陣列中
+    if (breeds.includes(tv)) {
+      // 如果有===>移出陣列
+      const nextBreeds = breeds.filter((v) => v !== tv);
+      setBreeds(nextBreeds);
+    } else {
+      // 否則===>加入陣列
+      const nextBreeds = [...breeds, tv];
+      setBreeds(nextBreeds);
+    }
+  };
+
+  //處理法複選
+  const handleProcessChecked = (e) => {
+    // 宣告方便使用的tv名稱，取得觸發事件物件的目標值
+    const tv = e.target.value;
+    // 判斷是否有在陣列中
+    if (process.includes(tv)) {
+      // 如果有===>移出陣列
+      const nextProcess = process.filter((v) => v !== tv);
+      setProcess(nextProcess);
+    } else {
+      // 否則===>加入陣列
+      const nextProcess = [...process, tv];
+      setProcess(nextProcess);
+    }
+  };
+
+  // 烘焙法複選時使用(使用字串陣列狀態)
+  const handleRoastChecked = (e) => {
+    // 宣告方便使用的tv名稱，取得觸發事件物件的目標值
+    const tv = e.target.value;
+    // 判斷是否有在陣列中
+    if (roast.includes(tv)) {
+      // 如果有===>移出陣列
+      const nextRoast = roast.filter((v) => v !== tv);
+      setRoast(nextRoast);
+    } else {
+      // 否則===>加入陣列
+      const nextRoast = [...roast, tv];
+      setRoast(nextRoast);
+    }
+  };
   // 按下搜尋按鈕
   const handleSearch = () => {
     // 每次搜尋條件後，因為頁數和筆數可能不同，所以要導向第1頁
-    setPage(1);
 
     const params = {
       page: 1, // 每次搜尋條件後，因為頁數和筆數可能不同，所以要導向第1頁，向伺服器要第1頁的資料
       perpage,
       sort: sort,
       order: order,
-      name_like: nameLike,
-      country: country.join(','), // 字串陣列需要轉換為逗點分隔(csv)字串
-      price_gte: priceGte,
-      price_lte: priceLte,
+      name_like: name_like,
+      country: country.join(','),
+      breeds: breeds.join(','), // 字串陣列需要轉換為逗點分隔(csv)字串
+      process: process.join(','),
+      roast: roast.join(','),
+      price_gte: price_gte,
+      price_lte: price_lte,
     };
 
     getProducts(params);
@@ -125,11 +177,28 @@ export default function List() {
       perpage,
       sort,
       order,
+      country,
+      breeds,
+      process,
+      roast,
+      price_gte,
+      price_lte,
     };
 
     // 向伺服器要求資料
     getProducts(params);
-  }, [page, perpage, sort, order]);
+  }, [
+    page,
+    perpage,
+    sort,
+    order,
+    country,
+    breeds,
+    process,
+    roast,
+    price_gte,
+    price_lte,
+  ]);
 
   return (
     <>
@@ -140,11 +209,12 @@ export default function List() {
         名稱:
         <input
           type="text"
-          value={nameLike}
+          value={name_like}
           onChange={(e) => {
             setNameLike(e.target.value);
           }}
         />
+        <div>目前搜尋:{name_like}</div>
       </div>
       <hr />
       <div>
@@ -167,10 +237,67 @@ export default function List() {
         })}
       </div>
       <div>
+        品種:
+        {breedsOptions.map((v, i) => {
+          return (
+            <label
+              // 當初次render後不會再改動，即沒有新增、刪除、更動時，可以用索引當key
+              key={i}
+            >
+              <input
+                type="checkbox"
+                value={v}
+                checked={breeds.includes(v)}
+                onChange={handleBreedChecked}
+              />
+              {v}
+            </label>
+          );
+        })}
+      </div>
+      <div>
+        處理法:
+        {processOptions.map((v, i) => {
+          return (
+            <label
+              // 當初次render後不會再改動，即沒有新增、刪除、更動時，可以用索引當key
+              key={i}
+            >
+              <input
+                type="checkbox"
+                value={v}
+                checked={process.includes(v)}
+                onChange={handleProcessChecked}
+              />
+              {v}
+            </label>
+          );
+        })}
+      </div>
+      <div>
+        烘焙法:
+        {roastOptions.map((v, i) => {
+          return (
+            <label
+              // 當初次render後不會再改動，即沒有新增、刪除、更動時，可以用索引當key
+              key={i}
+            >
+              <input
+                type="checkbox"
+                value={v}
+                checked={roast.includes(v)}
+                onChange={handleRoastChecked}
+              />
+              {v}
+            </label>
+          );
+        })}
+      </div>
+      <div>
         價格大於:
         <input
           type="number"
-          value={priceGte}
+          value={price_gte}
           onChange={(e) => {
             setPriceGte(Number(e.target.value));
           }}
@@ -178,7 +305,7 @@ export default function List() {
         小於:
         <input
           type="number"
-          value={priceLte}
+          value={price_lte}
           onChange={(e) => {
             setPriceLte(Number(e.target.value));
           }}
@@ -212,19 +339,6 @@ export default function List() {
         >
           下一頁
         </button>
-        每頁幾筆:{' '}
-        <select
-          value={perpage}
-          onChange={(e) => {
-            setPerpage(e.target.value);
-            // 因改變每頁筆數會造成頁數改變，所以需要跳回第一頁，以免造成操作邏輯上的bug
-            setPage(1);
-          }}
-        >
-          <option value="5">5</option>
-          <option value="10">10</option>
-          <option value="20">20</option>
-        </select>{' '}
         目前頁面 {page} / 總頁數: {pageCount} / 總筆數: {total}
       </div>
       <div>
@@ -237,6 +351,7 @@ export default function List() {
             setOrder(tv.split(',')[1]);
             // 因改變排序最好也要跳回第一頁，以免造成使用者操作上的誤解
             setPage(1);
+            console.log(tv);
           }}
         >
           <option value="p_id,asc">ID排序(由小至大)</option>
@@ -244,6 +359,8 @@ export default function List() {
           <option value="p_price,asc">價格排序(由低至高)</option>
           <option value="p_price,desc">價格排序(由高至低)</option>
           <option value="p_sold,desc">銷量(由高至低)</option>
+          <option value="p_date,desc">上架日期(由新至舊)</option>
+          <option value="p_date,asc">上架日期(由舊至新)</option>
         </select>
       </div>
       <h2>使用動態路由:`[productId]`</h2>

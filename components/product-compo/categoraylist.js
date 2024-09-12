@@ -1,10 +1,12 @@
-import React from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
+import cate from '@/styles/categoraylist.module.css';
 
 export default function Categoraylist() {
+  const [categoraylist, setCategorayList] = useState('shop');
   return (
     <>
-      <ul className="categoraylist">
+      <ul className={cate.categoraylist}>
         <li>
           <Link href="/" style={{ color: '#f4772f', textDecoration: 'none' }}>
             所有商品
@@ -35,21 +37,6 @@ export default function Categoraylist() {
           </Link>
         </li>
       </ul>
-      <style jsx>{`
-        .categoraylist {
-          list-style-type: none;
-          display: flex;
-          flex-direction: column;
-        }
-        .categoraylist li {
-          padding: 20px;
-        }
-
-        .linkStyle {
-          color: #f4772f;
-          text-decoration: none;
-        }
-      `}</style>
     </>
   );
 }

@@ -1,0 +1,13 @@
+.categoraylist {
+  list-style-type: none;
+  display: flex;
+  flex-direction: column;
+}
+.categoraylist li {
+  padding: 20px;
+}
+
+.linkStyle {
+  color: #f4772f;
+  text-decoration: none;
+}
