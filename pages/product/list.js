@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import ProductCard from '@/components/product-compo/productcard';
 import Categoraylist from '@/components/product-compo/categoraylist';
-
+import InputIme from '@/components/product-compo/input-ime';
 
 // 有名稱的路由(巢狀路由)
-export default function List() {
+export default function List(props) {
   // 商品物件陣列狀態
   // 注意1: 初始值至少要空陣列，初次渲染使用的是初始值
   // 注意2: 在應用程式執行過程中，一定要保持狀態的資料類型一致(陣列)
@@ -22,7 +22,6 @@ export default function List() {
 
   const [price_gte, setPriceGte] = useState(0);
   const [price_lte, setPriceLte] = useState(4000);
-
 
   // 品牌選項陣列
   const countryOptions = [
@@ -51,6 +50,9 @@ export default function List() {
   // 排序
   const [sort, setSort] = useState('p_id');
   const [order, setOrder] = useState('asc');
+
+  //分類
+  const [type, setType] = useState('');
 
   // 分頁用
   const [page, setPage] = useState(1);
@@ -157,7 +159,7 @@ export default function List() {
       perpage,
       sort: sort,
       order: order,
-      name_like: name_like,
+      name_like: name_like.join(','),
       country: country.join(','),
       breeds: breeds.join(','), // 字串陣列需要轉換為逗點分隔(csv)字串
       process: process.join(','),
@@ -183,6 +185,7 @@ export default function List() {
       roast,
       price_gte,
       price_lte,
+      name_like,
     };
 
     // 向伺服器要求資料
@@ -198,6 +201,7 @@ export default function List() {
     roast,
     price_gte,
     price_lte,
+    name_like,
   ]);
 
   return (
@@ -207,11 +211,11 @@ export default function List() {
       <h1>商品列表頁</h1>
       <div>
         名稱:
-        <input
-          type="text"
+        <InputIme
           value={name_like}
           onChange={(e) => {
             setNameLike(e.target.value);
+            console.log(e.target.value);
           }}
         />
         <div>目前搜尋:{name_like}</div>
@@ -341,6 +345,7 @@ export default function List() {
         </button>
         目前頁面 {page} / 總頁數: {pageCount} / 總筆數: {total}
       </div>
+
       <div>
         排序
         <select
