@@ -10,6 +10,7 @@ export default function Categoraylist() {
     <>
       <div>
         {type.map((v, i) => {
+<<<<<<< HEAD
           return (
             <Link href={`/product/type/${v}`} key={i}>
               {v}
@@ -18,6 +19,11 @@ export default function Categoraylist() {
         })}
       </div>
       <Link href={`/product/list`}></Link>
+=======
+          return <button key={i}>{v}</button>;
+        })}
+      </div>
+>>>>>>> 677a9742fa2bad7fc093b88524dbcac0ab93fdbe
     </>
   );
 }
