@@ -63,10 +63,10 @@ export default function List(props) {
   const getProducts = async (params = {}) => {
     const baseURL = 'http://localhost:3005/api/product_list';
     // 轉換params為查詢字串
-
+    const cs = router.query.cs || 'all';
     const searchParams = new URLSearchParams(params);
     const qs = searchParams.toString();
-    const url = `${baseURL}?${qs}`;
+    const url = `${baseURL}?${qs}&calss=${cs}`;
 
     // 使用try-catch語句，讓和伺服器連線的程式能作錯誤處理
     try {
