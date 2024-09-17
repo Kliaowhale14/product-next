@@ -10,6 +10,11 @@ export default function Categoraylist() {
     <>
       <div>
         {type.map((v, i) => {
+<<<<<<<<< Temporary merge branch 1
+          return <button key={i}>{v}</button>;
+        })}
+      </div>
+=========
           return (
             <Link href={`/product/type/${v}`} key={i}>
               {v}
@@ -18,6 +23,7 @@ export default function Categoraylist() {
         })}
       </div>
       <Link href={`/product/list`}></Link>
+>>>>>>>>> Temporary merge branch 2
     </>
   );
 }
