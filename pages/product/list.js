@@ -1,11 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
 import Link from 'next/link';
 import ProductCard from '@/components/product-compo/productcard';
 import Categoraylist from '@/components/product-compo/categoraylist';
 import InputIme from '@/components/product-compo/input-ime';
+import style from '@/styles/productlist.module.css';
 
 // 有名稱的路由(巢狀路由)
-export default function List(props) {
+export default function List() {
   // 商品物件陣列狀態
   // 注意1: 初始值至少要空陣列，初次渲染使用的是初始值
   // 注意2: 在應用程式執行過程中，一定要保持狀態的資料類型一致(陣列)
@@ -22,6 +24,8 @@ export default function List(props) {
 
   const [price_gte, setPriceGte] = useState(0);
   const [price_lte, setPriceLte] = useState(4000);
+
+  const router = useRouter();
 
   // 品牌選項陣列
   const countryOptions = [
@@ -51,22 +55,37 @@ export default function List(props) {
   const [sort, setSort] = useState('p_id');
   const [order, setOrder] = useState('asc');
 
-  //分類
-  const [type, setType] = useState('');
-
   // 分頁用
   const [page, setPage] = useState(1);
-  const [perpage, setPerpage] = useState(15);
+  const [perpage, setPerpage] = useState(16);
 
   // 向伺服器獲取資料(建議寫在useEffect外，用async-await)
+
+  const getProductsByTypeID = async (typeID) => {
+    const baseURL = `http://localhost:3005/api/product_list/type/${typeID}?page=${page}&perpage=${perpage}&sort=${sort}&order=${order}&country=${country}&breeds=${breeds}&process=${process}&price_gte=${price_gte}&price_lte=${price_lte}&name_like=${name_like}`;
+
+    try {
+      const res = await fetch(baseURL);
+      const resData = await res.json();
+
+      console.log(resData);
+
+      // 設定到狀態中
+      // (3.) 設定到狀態後 -> 觸發update(re-render)
+      if (resData.status === 'success') {
+        setProducts(resData.data.product);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const getProducts = async (params = {}) => {
     const baseURL = 'http://localhost:3005/api/product_list';
     // 轉換params為查詢字串
-    const cs = router.query.cs || 'all';
     const searchParams = new URLSearchParams(params);
     const qs = searchParams.toString();
-    const url = `${baseURL}?${qs}&calss=${cs}`;
+    const url = `${baseURL}?${qs}`;
 
     // 使用try-catch語句，讓和伺服器連線的程式能作錯誤處理
     try {
@@ -150,26 +169,6 @@ export default function List(props) {
       setRoast(nextRoast);
     }
   };
-  // 按下搜尋按鈕
-  const handleSearch = () => {
-    // 每次搜尋條件後，因為頁數和筆數可能不同，所以要導向第1頁
-
-    const params = {
-      page: 1, // 每次搜尋條件後，因為頁數和筆數可能不同，所以要導向第1頁，向伺服器要第1頁的資料
-      perpage,
-      sort: sort,
-      order: order,
-      name_like: name_like.join(','),
-      country: country.join(','),
-      breeds: breeds.join(','), // 字串陣列需要轉換為逗點分隔(csv)字串
-      process: process.join(','),
-      roast: roast.join(','),
-      price_gte: price_gte,
-      price_lte: price_lte,
-    };
-
-    getProducts(params);
-  };
 
   // 樣式2: didMount
   useEffect(() => {
@@ -189,7 +188,11 @@ export default function List(props) {
     };
 
     // 向伺服器要求資料
-    getProducts(params);
+    if (router.query.type) {
+      getProductsByTypeID(router.query.type);
+    } else {
+      getProducts(params);
+    }
   }, [
     page,
     perpage,
@@ -204,176 +207,214 @@ export default function List(props) {
     name_like,
   ]);
 
+  useEffect(() => {
+    if (router.isReady) {
+      // 這裡可以確保一定可以得到router.query的值
+      console.log(router.query);
+      // 向伺服器要求資料
+      if (router.query.type) {
+        getProductsByTypeID(router.query.type);
+      } else {
+        // 建立查詢字串用的參數值
+        const params = {
+          page,
+          perpage,
+          sort,
+          order,
+          country,
+          breeds,
+          process,
+          roast,
+          price_gte,
+          price_lte,
+          name_like,
+        };
+
+        // 向伺服器要求資料
+        getProducts(params);
+      }
+    }
+
+    // 以下為省略eslint檢查一行，這裡再加上router.query意義會有所不同目前會是多餘的
+    // eslint-disable-next-line
+  }, [router.isReady, router.query])
   return (
     <>
-      <Categoraylist />
+      <div className={style.container}>
+        <div className={style.sidebar}>
+          <Categoraylist />
+          <div>
+            <InputIme
+              className={style.searchbox}
+              value={name_like}
+              placeholder="查詢商品"
+              onChange={(e) => {
+                setNameLike(e.target.value);
+                console.log(e.target.value);
+              }}
+            />
+          </div>
+          <hr />
 
-      <h1>商品列表頁</h1>
-      <div>
-        名稱:
-        <InputIme
-          value={name_like}
-          onChange={(e) => {
-            setNameLike(e.target.value);
-            console.log(e.target.value);
-          }}
-        />
-        <div>目前搜尋:{name_like}</div>
-      </div>
-      <hr />
-      <div>
-        國家:
-        {countryOptions.map((v, i) => {
-          return (
-            <label
-              // 當初次render後不會再改動，即沒有新增、刪除、更動時，可以用索引當key
-              key={i}
-            >
-              <input
-                type="checkbox"
-                value={v}
-                checked={country.includes(v)}
-                onChange={handleBrandChecked}
-              />
-              {v}
-            </label>
-          );
-        })}
-      </div>
-      <div>
-        品種:
-        {breedsOptions.map((v, i) => {
-          return (
-            <label
-              // 當初次render後不會再改動，即沒有新增、刪除、更動時，可以用索引當key
-              key={i}
-            >
-              <input
-                type="checkbox"
-                value={v}
-                checked={breeds.includes(v)}
-                onChange={handleBreedChecked}
-              />
-              {v}
-            </label>
-          );
-        })}
-      </div>
-      <div>
-        處理法:
-        {processOptions.map((v, i) => {
-          return (
-            <label
-              // 當初次render後不會再改動，即沒有新增、刪除、更動時，可以用索引當key
-              key={i}
-            >
-              <input
-                type="checkbox"
-                value={v}
-                checked={process.includes(v)}
-                onChange={handleProcessChecked}
-              />
-              {v}
-            </label>
-          );
-        })}
-      </div>
-      <div>
-        烘焙法:
-        {roastOptions.map((v, i) => {
-          return (
-            <label
-              // 當初次render後不會再改動，即沒有新增、刪除、更動時，可以用索引當key
-              key={i}
-            >
-              <input
-                type="checkbox"
-                value={v}
-                checked={roast.includes(v)}
-                onChange={handleRoastChecked}
-              />
-              {v}
-            </label>
-          );
-        })}
-      </div>
-      <div>
-        價格大於:
-        <input
-          type="number"
-          value={price_gte}
-          onChange={(e) => {
-            setPriceGte(Number(e.target.value));
-          }}
-        />
-        小於:
-        <input
-          type="number"
-          value={price_lte}
-          onChange={(e) => {
-            setPriceLte(Number(e.target.value));
-          }}
-        />
-      </div>
-      <hr />
-      <div>
-        <button onClick={handleSearch}>搜尋</button>
-      </div>
-      <hr />
-      <div>
-        <button
-          onClick={() => {
-            const nextPage = page - 1;
-            // 最小是1
-            if (nextPage >= 1) {
-              setPage(nextPage);
-            }
-          }}
-        >
-          上一頁
-        </button>
-        <button
-          onClick={() => {
-            const nextPage = page + 1;
-            // 最大是pageCount
-            if (nextPage <= pageCount) {
-              setPage(nextPage);
-            }
-          }}
-        >
-          下一頁
-        </button>
-        目前頁面 {page} / 總頁數: {pageCount} / 總筆數: {total}
-      </div>
+          <div>
+            <p className={style.filter_opt}>國家</p>
+            <div>
+              {countryOptions.map((v, i) => {
+                return (
+                  <label
+                    className={style.filter_opt}
+                    // 當初次render後不會再改動，即沒有新增、刪除、更動時，可以用索引當key
+                    key={i}
+                  >
+                    <input
+                      className={style.filter_box}
+                      type="checkbox"
+                      value={v}
+                      checked={country.includes(v)}
+                      onChange={handleBrandChecked}
+                    />
+                    {v}
+                    <span className={style.filter_mark}></span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+          <div>
+            品種:
+            {breedsOptions.map((v, i) => {
+              return (
+                <label
+                  className={style.filter_opt}
+                  // 當初次render後不會再改動，即沒有新增、刪除、更動時，可以用索引當key
+                  key={i}
+                >
+                  <input
+                    type="checkbox"
+                    value={v}
+                    checked={breeds.includes(v)}
+                    onChange={handleBreedChecked}
+                  />
+                  {v}
+                </label>
+              );
+            })}
+          </div>
+          <div>
+            處理法:
+            {processOptions.map((v, i) => {
+              return (
+                <label
+                  className={style.filter_opt}
+                  // 當初次render後不會再改動，即沒有新增、刪除、更動時，可以用索引當key
+                  key={i}
+                >
+                  <input
+                    type="checkbox"
+                    value={v}
+                    checked={process.includes(v)}
+                    onChange={handleProcessChecked}
+                  />
+                  {v}
+                </label>
+              );
+            })}
+          </div>
+          <div>
+            烘焙法:
+            {roastOptions.map((v, i) => {
+              return (
+                <label
+                  className={style.filter_opt}
+                  // 當初次render後不會再改動，即沒有新增、刪除、更動時，可以用索引當key
+                  key={i}
+                >
+                  <input
+                    type="checkbox"
+                    value={v}
+                    checked={roast.includes(v)}
+                    onChange={handleRoastChecked}
+                  />
+                  {v}
+                </label>
+              );
+            })}
+          </div>
+          <div>
+            價格大於:
+            <input
+              type="number"
+              value={price_gte}
+              onChange={(e) => {
+                setPriceGte(Number(e.target.value));
+              }}
+            />
+            小於:
+            <input
+              type="number"
+              value={price_lte}
+              onChange={(e) => {
+                setPriceLte(Number(e.target.value));
+              }}
+            />
+          </div>
+        </div>
 
-      <div>
-        排序
-        <select
-          value={`${sort},${order}`}
-          onChange={(e) => {
-            const tv = e.target.value;
-            setSort(tv.split(',')[0]);
-            setOrder(tv.split(',')[1]);
-            // 因改變排序最好也要跳回第一頁，以免造成使用者操作上的誤解
-            setPage(1);
-            console.log(tv);
-          }}
-        >
-          <option value="p_id,asc">ID排序(由小至大)</option>
-          <option value="p_id,desc">ID排序(由大至小)</option>
-          <option value="p_price,asc">價格排序(由低至高)</option>
-          <option value="p_price,desc">價格排序(由高至低)</option>
-          <option value="p_sold,desc">銷量(由高至低)</option>
-          <option value="p_date,desc">上架日期(由新至舊)</option>
-          <option value="p_date,asc">上架日期(由舊至新)</option>
-        </select>
-      </div>
-      <h2>使用動態路由:`[productId]`</h2>
-      <div className="row row-cols-1 row-cols-md-3 g-4">
-        {products &&
-          products.map((item) => {
-            return <ProductCard item={item} key={item.id} />;
-          })}
+        <div>
+          <div>
+            <select
+              value={`${sort},${order}`}
+              onChange={(e) => {
+                const tv = e.target.value;
+                setSort(tv.split(',')[0]);
+                setOrder(tv.split(',')[1]);
+                // 因改變排序最好也要跳回第一頁，以免造成使用者操作上的誤解
+                setPage(1);
+                console.log(tv);
+              }}
+            >
+              <option value="p_id,asc">ID排序(由小至大)</option>
+              <option value="p_id,desc">ID排序(由大至小)</option>
+              <option value="p_price,asc">價格排序(由低至高)</option>
+              <option value="p_price,desc">價格排序(由高至低)</option>
+              <option value="p_sold,desc">銷量(由高至低)</option>
+              <option value="p_date,desc">上架日期(由新至舊)</option>
+              <option value="p_date,asc">上架日期(由舊至新)</option>
+            </select>
+          </div>
+
+          <div className={style.context}>
+            {products &&
+              products.map((item) => {
+                return <ProductCard item={item} key={item.id} />;
+              })}
+          </div>
+          <div>
+            <button
+              onClick={() => {
+                const nextPage = page - 1;
+                // 最小是1
+                if (nextPage >= 1) {
+                  setPage(nextPage);
+                }
+              }}
+            >
+              上一頁
+            </button>
+            <button
+              onClick={() => {
+                const nextPage = page + 1;
+                // 最大是pageCount
+                if (nextPage <= pageCount) {
+                  setPage(nextPage);
+                }
+              }}
+            >
+              下一頁
+            </button>
+            目前頁面 {page} / 總頁數: {pageCount} / 總筆數: {total}
+          </div>
+        </div>
       </div>
     </>
   );

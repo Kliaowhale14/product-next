@@ -2,12 +2,15 @@
   list-style-type: none;
   display: flex;
   flex-direction: column;
-}
-.categoraylist li {
-  padding: 20px;
-}
-
-.linkStyle {
-  color: #f4772f;
+  align-items: center;
+  color: #FFFFFF;
   text-decoration: none;
+  font-size: 20px;
+ padding :10px;
+
+}
+.categoraylist:hover{
+  border-left: 4px solid #F4772F;
+  font-weight: 500;
+  
 }
