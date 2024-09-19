@@ -5,6 +5,17 @@ import ProductCard from '@/components/product-compo/productcard';
 import Categoraylist from '@/components/product-compo/categoraylist';
 import InputIme from '@/components/product-compo/input-ime';
 import style from '@/styles/productlist.module.css';
+import { FaPlus } from 'react-icons/fa';
+import { BsDashLg } from 'react-icons/bs';
+import { IoSearch } from 'react-icons/io5';
+import BS5Pagination from '@/components/common/bs5-pagination';
+import {
+  Accordion,
+  AccordionItem,
+  AccordionItemHeading,
+  AccordionItemButton,
+  AccordionItemPanel,
+} from 'react-accessible-accordion';
 
 // 有名稱的路由(巢狀路由)
 export default function List() {
@@ -21,7 +32,6 @@ export default function List() {
   const [breeds, setBreeds] = useState([]); // 字串陣列
   const [process, setProcess] = useState([]); // 字串陣列
   const [roast, setRoast] = useState([]); // 字串陣列
-
   const [price_gte, setPriceGte] = useState(0);
   const [price_lte, setPriceLte] = useState(4000);
 
@@ -169,7 +179,10 @@ export default function List() {
       setRoast(nextRoast);
     }
   };
-
+  // 分頁元件的頁碼改變時
+  const handlePageClick = (event) => {
+    setPage(event.selected + 1);
+  };
   // 樣式2: didMount
   useEffect(() => {
     // 建立查詢字串用的參數值
@@ -244,44 +257,86 @@ export default function List() {
         <div className={style.sidebar}>
           <Categoraylist />
           <div>
+            <IoSearch className={style.searchname} />
+
             <InputIme
               className={style.searchbox}
               value={name_like}
-              placeholder="查詢商品"
+              placeholder="輸入查詢名稱"
               onChange={(e) => {
                 setNameLike(e.target.value);
                 console.log(e.target.value);
               }}
             />
           </div>
-          <hr />
-
-          <div>
-            <p className={style.filter_opt}>國家</p>
+          <div className={style.filter_block}>
+            <p className={style.price_title}>價格區間</p>
+            <p className={style.price_intro}>(原始區間NT.0~NT.4000)</p>
             <div>
-              {countryOptions.map((v, i) => {
-                return (
-                  <label
-                    className={style.filter_opt}
-                    // 當初次render後不會再改動，即沒有新增、刪除、更動時，可以用索引當key
-                    key={i}
-                  >
-                    <input
-                      className={style.filter_box}
-                      type="checkbox"
-                      value={v}
-                      checked={country.includes(v)}
-                      onChange={handleBrandChecked}
-                    />
-                    {v}
-                    <span className={style.filter_mark}></span>
-                  </label>
-                );
-              })}
+              <div className={style.price_box}>
+                <p>最低</p>
+                <p>最高</p>
+              </div>
+
+              <div className={style.price_box}>
+                <input
+                  className={style.price_input}
+                  type="number"
+                  value={price_gte}
+                  onChange={(e) => {
+                    setPriceGte(Number(e.target.value));
+                  }}
+                />
+                <BsDashLg className={style.price_dash} />
+                <input
+                  className={style.price_input}
+                  type="number"
+                  value={price_lte}
+                  onChange={(e) => {
+                    setPriceLte(Number(e.target.value));
+                  }}
+                />
+              </div>
             </div>
           </div>
-          <div>
-            品種:
+
+          <Accordion className={style.filter_block} allowMultipleExpanded>
+            <p className={style.filter_title}>國家</p>
+            <AccordionItem>
+              <AccordionItemHeading>
+                <AccordionItemButton>
+                  <FaPlus className={style.filter_icon} />
+                </AccordionItemButton>
+              </AccordionItemHeading>
+
+              <AccordionItemPanel>
+                {countryOptions.map((v, i) => {
+                  return (
+                    <label
+                      className={style.filter_opt}
+                      // 當初次render後不會再改動，即沒有新增、刪除、更動時，可以用索引當key
+                      key={i}
+                    >
+                      <input
+                        className={style.filter_box}
+                        type="checkbox"
+                        value={v}
+                        checked={country.includes(v)}
+                        onChange={handleBrandChecked}
+                      />
+                      {v}
+                      <span className={style.filter_mark}></span>
+                    </label>
+                  );
+                })}
+              </AccordionItemPanel>
+            </AccordionItem>
+          </Accordion>
+
+          <div className={style.filter_block}>
+            <p className={style.filter_title}>品種</p>
+            <FaPlus className={style.filter_icon} />
+
             {breedsOptions.map((v, i) => {
               return (
                 <label
@@ -290,18 +345,22 @@ export default function List() {
                   key={i}
                 >
                   <input
+                    className={style.filter_box}
                     type="checkbox"
                     value={v}
                     checked={breeds.includes(v)}
                     onChange={handleBreedChecked}
                   />
                   {v}
+                  <span className={style.filter_mark}></span>
                 </label>
               );
             })}
           </div>
-          <div>
-            處理法:
+          <div className={style.filter_block}>
+            <p className={style.filter_title}>處理法</p>
+            <FaPlus className={style.filter_icon} />
+
             {processOptions.map((v, i) => {
               return (
                 <label
@@ -310,18 +369,21 @@ export default function List() {
                   key={i}
                 >
                   <input
+                    className={style.filter_box}
                     type="checkbox"
                     value={v}
                     checked={process.includes(v)}
                     onChange={handleProcessChecked}
                   />
                   {v}
+                  <span className={style.filter_mark}></span>
                 </label>
               );
             })}
           </div>
-          <div>
-            烘焙法:
+          <div className={style.filter_block}>
+            <p className={style.filter_title}>烘焙程度</p>
+            <FaPlus className={style.filter_icon} />
             {roastOptions.map((v, i) => {
               return (
                 <label
@@ -336,32 +398,15 @@ export default function List() {
                     onChange={handleRoastChecked}
                   />
                   {v}
+                  <span className={style.filter_mark}></span>
                 </label>
               );
             })}
           </div>
-          <div>
-            價格大於:
-            <input
-              type="number"
-              value={price_gte}
-              onChange={(e) => {
-                setPriceGte(Number(e.target.value));
-              }}
-            />
-            小於:
-            <input
-              type="number"
-              value={price_lte}
-              onChange={(e) => {
-                setPriceLte(Number(e.target.value));
-              }}
-            />
-          </div>
         </div>
 
         <div>
-          <div>
+          <div className={style.order}>
             <select
               value={`${sort},${order}`}
               onChange={(e) => {
@@ -389,30 +434,13 @@ export default function List() {
                 return <ProductCard item={item} key={item.id} />;
               })}
           </div>
-          <div>
-            <button
-              onClick={() => {
-                const nextPage = page - 1;
-                // 最小是1
-                if (nextPage >= 1) {
-                  setPage(nextPage);
-                }
-              }}
-            >
-              上一頁
-            </button>
-            <button
-              onClick={() => {
-                const nextPage = page + 1;
-                // 最大是pageCount
-                if (nextPage <= pageCount) {
-                  setPage(nextPage);
-                }
-              }}
-            >
-              下一頁
-            </button>
-            目前頁面 {page} / 總頁數: {pageCount} / 總筆數: {total}
+          {/*  呈現分頁元件 */}
+          <div className={style.pagenation}>
+            <BS5Pagination
+              forcePage={page - 1}
+              onPageChange={handlePageClick}
+              pageCount={pageCount}
+            />
           </div>
         </div>
       </div>

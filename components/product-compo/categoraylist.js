@@ -8,8 +8,8 @@ export default function Categoraylist() {
 
   return (
     <>
-      <div >
-        <Link href={`/product/list`} className={style.categoraylist} >
+      <div>
+        <Link href={`/product/list`} className={style.categoraylist}>
           所有商品
         </Link>
         {type.map((v, i) => {

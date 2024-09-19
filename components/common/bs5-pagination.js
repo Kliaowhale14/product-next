@@ -1,5 +1,6 @@
 // boostrap5 sytle pagination
-import ReactPaginate from 'react-paginate'
+import ReactPaginate from 'react-paginate';
+import style from '@/styles/productlist.module.css';
 
 export default function BS5Pagination({ forcePage, onPageChange, pageCount }) {
   return (
@@ -11,18 +12,18 @@ export default function BS5Pagination({ forcePage, onPageChange, pageCount }) {
       marginPagesDisplayed={2}
       pageCount={pageCount}
       previousLabel="< 上一頁"
-      pageClassName="page-item"
-      pageLinkClassName="page-link"
+      pageClassName="pagenation"
+      pageLinkClassName=""
       previousClassName="page-item"
-      previousLinkClassName="page-link"
+      previousLinkClassName=""
       nextClassName="page-item"
-      nextLinkClassName="page-link"
+      nextLinkClassName=""
       breakLabel="..."
       breakClassName="page-item"
-      breakLinkClassName="page-link"
+      breakLinkClassName=""
       containerClassName="pagination"
-      activeClassName="active"
+      activeClassName={style.pageactive}
       renderOnZeroPageCount={null}
     />
-  )
+  );
 }
