@@ -4,7 +4,7 @@ import style from '@/styles/categoraylist.module.css';
 
 export default function Categoraylist() {
   const [categoraylist, setCategorayList] = useState([]);
-  const type = ['咖啡豆', '季節限定', '推薦送禮'];
+  const type = ['精選咖啡', '季節限定', '推薦送禮'];
 
   return (
     <>
