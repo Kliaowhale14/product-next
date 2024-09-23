@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import Link from 'next/link';
 import ProductCard from '@/components/product-compo/productcard';
 import Categoraylist from '@/components/product-compo/categoraylist';
 import InputIme from '@/components/product-compo/input-ime';
@@ -18,7 +17,7 @@ import {
 } from 'react-accessible-accordion';
 import Banner from '@/components/product-compo/banner';
 import Filterbtn from '@/components/product-compo/filter-btn';
-
+import 'react-responsive-modal/styles.css';
 // 有名稱的路由(巢狀路由)
 export default function List(item) {
   // 商品物件陣列狀態
@@ -37,6 +36,12 @@ export default function List(item) {
   const [price_gte, setPriceGte] = useState(0);
   const [price_lte, setPriceLte] = useState(4000);
 
+  //filter-open
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  const toggleFilter = () => {
+    setIsFilterOpen((prev) => !prev);
+  };
   const router = useRouter();
 
   // 品牌選項陣列
@@ -84,6 +89,7 @@ export default function List(item) {
       // (3.) 設定到狀態後 -> 觸發update(re-render)
       if (resData.status === 'success') {
         setProducts(resData.data.product);
+        setPageCount(resData.data.pageCount);
       }
     } catch (e) {
       console.error(e);
@@ -183,6 +189,30 @@ export default function List(item) {
   const handlePageClick = (event) => {
     setPage(event.selected + 1);
   };
+
+  const handleLoadData = () => {
+    // 要送至伺服器的query string參數
+    // 註: 重新載入資料需要跳至第一頁
+    const params = {
+      page: 1, // 跳至第一頁
+      perpage,
+      name_like: name_like,
+      countrys: country.join(','),
+      breeds: breeds.join(','),
+      process: process.join(','),
+      roast: roast.join(','),
+      pricegte: price_gte, // 會有'0'price_gte
+      pricelte: price_lte, // 會有'0'字串的情況，注意要跳過此條件
+    };
+
+    // console.log(params)
+
+    router.push({
+      pathname: router.pathname,
+      query: params,
+    });
+  };
+
   // 樣式2: didMount
   useEffect(() => {
     // 建立查詢字串用的參數值
@@ -227,6 +257,7 @@ export default function List(item) {
       // 向伺服器要求資料
       if (router.query.type) {
         getProductsByTypeID(router.query.type);
+        setPageCount(router.query.type);
       } else {
         // 建立查詢字串用的參數值
         const params = {
@@ -241,7 +272,7 @@ export default function List(item) {
           price_gte,
           price_lte,
           name_like,
-        };
+        } ;
 
         // 向伺服器要求資料
         getProducts(params);
@@ -272,167 +303,177 @@ export default function List(item) {
                 }}
               />
             </div>
-            <div className={style.filter_block}>
-              <p className={style.filter_price_title}>價格區間</p>
-              <p className={style.filter_price_intro}>(原始區間NT.0~NT.4000)</p>
-              <div>
-                <div className={style.filter_price_box}>
-                  <p>最低</p>
-                  <p>最高</p>
-                </div>
+            <button className={style.filter_btn} onClick={toggleFilter}>
+              <Filterbtn />
+            </button>
 
-                <div className={style.filter_price_box}>
-                  <input
-                    className={style.filter_price_input}
-                    type="text"
-                    value={price_gte}
-                    onChange={(e) => {
-                      setPriceGte(Number(e.target.value));
-                    }}
-                  />
-                  <BsDashLg className={style.filter_price_dash} />
-                  <input
-                    className={style.filter_price_input}
-                    type="text"
-                    value={price_lte}
-                    onChange={(e) => {
-                      setPriceLte(Number(e.target.value));
-                    }}
-                  />
+            <div
+              className={`${style.filter} ${isFilterOpen ? style.open : ''}`}
+            >
+              <div className={style.filter_block}>
+                <p className={style.filter_price_title}>價格區間</p>
+                <p className={style.filter_price_intro}>
+                  (原始區間NT.0~NT.4000)
+                </p>
+                <div>
+                  <div className={style.filter_price_box}>
+                    <p>最低</p>
+                    <p>最高</p>
+                  </div>
+
+                  <div className={style.filter_price_box}>
+                    <input
+                      className={style.filter_price_input}
+                      type="text"
+                      value={price_gte}
+                      onChange={(e) => {
+                        setPriceGte(Number(e.target.value));
+                      }}
+                    />
+                    <BsDashLg className={style.filter_price_dash} />
+                    <input
+                      className={style.filter_price_input}
+                      type="text"
+                      value={price_lte}
+                      onChange={(e) => {
+                        setPriceLte(Number(e.target.value));
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
+
+              <Accordion allowMultipleExpanded>
+                <div className={style.filter_block}>
+                  <AccordionItem>
+                    <AccordionItemHeading>
+                      <AccordionItemButton>
+                        <p className={style.filter_title}>國家</p>
+                        <FaPlus className={style.filter_icon} />
+                      </AccordionItemButton>
+                    </AccordionItemHeading>
+
+                    <AccordionItemPanel>
+                      {countryOptions.map((v, i) => {
+                        return (
+                          <label
+                            className={style.filter_opt}
+                            // 當初次render後不會再改動，即沒有新增、刪除、更動時，可以用索引當key
+                            key={i}
+                          >
+                            <input
+                              className={style.filter_box}
+                              type="checkbox"
+                              value={v}
+                              checked={country.includes(v)}
+                              onChange={handleBrandChecked}
+                            />
+                            {v}
+                            <span className={style.filter_mark}></span>
+                          </label>
+                        );
+                      })}
+                    </AccordionItemPanel>
+                  </AccordionItem>
+                </div>
+
+                <div className={style.filter_block}>
+                  <AccordionItem>
+                    <AccordionItemHeading>
+                      <AccordionItemButton>
+                        <p className={style.filter_title}>品種</p>
+                        <FaPlus className={style.filter_icon} />
+                      </AccordionItemButton>
+                    </AccordionItemHeading>
+                    <AccordionItemPanel>
+                      {breedsOptions.map((v, i) => {
+                        return (
+                          <label
+                            className={style.filter_opt}
+                            // 當初次render後不會再改動，即沒有新增、刪除、更動時，可以用索引當key
+                            key={i}
+                          >
+                            <input
+                              className={style.filter_box}
+                              type="checkbox"
+                              value={v}
+                              checked={breeds.includes(v)}
+                              onChange={handleBreedChecked}
+                            />
+                            {v}
+                            <span className={style.filter_mark}></span>
+                          </label>
+                        );
+                      })}
+                    </AccordionItemPanel>
+                  </AccordionItem>
+                  <button onClick={handleLoadData}>搜尋</button>
+                </div>
+
+                <div className={style.filter_block}>
+                  <AccordionItem>
+                    <AccordionItemHeading>
+                      <AccordionItemButton>
+                        <p className={style.filter_title}>處理法</p>
+                        <FaPlus className={style.filter_icon} />
+                      </AccordionItemButton>
+                    </AccordionItemHeading>
+                    <AccordionItemPanel>
+                      {processOptions.map((v, i) => {
+                        return (
+                          <label
+                            className={style.filter_opt}
+                            // 當初次render後不會再改動，即沒有新增、刪除、更動時，可以用索引當key
+                            key={i}
+                          >
+                            <input
+                              className={style.filter_box}
+                              type="checkbox"
+                              value={v}
+                              checked={process.includes(v)}
+                              onChange={handleProcessChecked}
+                            />
+                            {v}
+                            <span className={style.filter_mark}></span>
+                          </label>
+                        );
+                      })}
+                    </AccordionItemPanel>
+                  </AccordionItem>
+                </div>
+                <div className={style.filter_block}>
+                  <AccordionItem>
+                    <AccordionItemHeading>
+                      <AccordionItemButton>
+                        <p className={style.filter_title}>烘焙程度</p>
+                        <FaPlus className={style.filter_icon} />
+                      </AccordionItemButton>
+                    </AccordionItemHeading>
+                    <AccordionItemPanel>
+                      {roastOptions.map((v, i) => {
+                        return (
+                          <label
+                            className={style.filter_opt}
+                            // 當初次render後不會再改動，即沒有新增、刪除、更動時，可以用索引當key
+                            key={i}
+                          >
+                            <input
+                              type="checkbox"
+                              value={v}
+                              checked={roast.includes(v)}
+                              onChange={handleRoastChecked}
+                            />
+                            {v}
+                            <span className={style.filter_mark}></span>
+                          </label>
+                        );
+                      })}{' '}
+                    </AccordionItemPanel>
+                  </AccordionItem>
+                </div>
+              </Accordion>
             </div>
-            <Filterbtn />
-            <Accordion allowMultipleExpanded>
-              <div className={style.filter_block}>
-                <AccordionItem>
-                  <AccordionItemHeading>
-                    <AccordionItemButton>
-                      <p className={style.filter_title}>國家</p>
-                      <FaPlus className={style.filter_icon} />
-                    </AccordionItemButton>
-                  </AccordionItemHeading>
-
-                  <AccordionItemPanel>
-                    {countryOptions.map((v, i) => {
-                      return (
-                        <label
-                          className={style.filter_opt}
-                          // 當初次render後不會再改動，即沒有新增、刪除、更動時，可以用索引當key
-                          key={i}
-                        >
-                          <input
-                            className={style.filter_box}
-                            type="checkbox"
-                            value={v}
-                            checked={country.includes(v)}
-                            onChange={handleBrandChecked}
-                          />
-                          {v}
-                          <span className={style.filter_mark}></span>
-                        </label>
-                      );
-                    })}
-                  </AccordionItemPanel>
-                </AccordionItem>
-              </div>
-
-              <div className={style.filter_block}>
-                <AccordionItem>
-                  <AccordionItemHeading>
-                    <AccordionItemButton>
-                      <p className={style.filter_title}>品種</p>
-                      <FaPlus className={style.filter_icon} />
-                    </AccordionItemButton>
-                  </AccordionItemHeading>
-                  <AccordionItemPanel>
-                    {breedsOptions.map((v, i) => {
-                      return (
-                        <label
-                          className={style.filter_opt}
-                          // 當初次render後不會再改動，即沒有新增、刪除、更動時，可以用索引當key
-                          key={i}
-                        >
-                          <input
-                            className={style.filter_box}
-                            type="checkbox"
-                            value={v}
-                            checked={breeds.includes(v)}
-                            onChange={handleBreedChecked}
-                          />
-                          {v}
-                          <span className={style.filter_mark}></span>
-                        </label>
-                      );
-                    })}
-                  </AccordionItemPanel>
-                </AccordionItem>
-              </div>
-
-              <div className={style.filter_block}>
-                <AccordionItem>
-                  <AccordionItemHeading>
-                    <AccordionItemButton>
-                      <p className={style.filter_title}>處理法</p>
-                      <FaPlus className={style.filter_icon} />
-                    </AccordionItemButton>
-                  </AccordionItemHeading>
-                  <AccordionItemPanel>
-                    {processOptions.map((v, i) => {
-                      return (
-                        <label
-                          className={style.filter_opt}
-                          // 當初次render後不會再改動，即沒有新增、刪除、更動時，可以用索引當key
-                          key={i}
-                        >
-                          <input
-                            className={style.filter_box}
-                            type="checkbox"
-                            value={v}
-                            checked={process.includes(v)}
-                            onChange={handleProcessChecked}
-                          />
-                          {v}
-                          <span className={style.filter_mark}></span>
-                        </label>
-                      );
-                    })}
-                  </AccordionItemPanel>
-                </AccordionItem>
-              </div>
-              <div className={style.filter_block}>
-                <AccordionItem>
-                  <AccordionItemHeading>
-                    <AccordionItemButton>
-                      <p className={style.filter_title}>烘焙程度</p>
-                      <FaPlus className={style.filter_icon} />
-                    </AccordionItemButton>
-                  </AccordionItemHeading>
-                  <AccordionItemPanel>
-                    {roastOptions.map((v, i) => {
-                      return (
-                        <label
-                          className={style.filter_opt}
-                          // 當初次render後不會再改動，即沒有新增、刪除、更動時，可以用索引當key
-                          key={i}
-                        >
-                          <input
-                            type="checkbox"
-                            value={v}
-                            checked={roast.includes(v)}
-                            onChange={handleRoastChecked}
-                          />
-                          {v}
-                          <span className={style.filter_mark}></span>
-                        </label>
-                      );
-                    })}{' '}
-                  </AccordionItemPanel>
-                </AccordionItem>
-              </div>
-            </Accordion>
           </div>
-
           <div>
             <div className={style.order}>
               <select
@@ -457,11 +498,13 @@ export default function List(item) {
             </div>
 
             <div className={style.context}>
-              {products.length === 0
-                ? <p className={style.wrong_msg}>找不到</p>
-                : products.map((item) => {
-                    return <ProductCard item={item} key={item.id} />;
-                  })}
+              {products.length === 0 ? (
+                <p className={style.wrong_msg}>找不到</p>
+              ) : (
+                products.map((item) => {
+                  return <ProductCard item={item} key={item.id} />;
+                })
+              )}
             </div>
             {/*  呈現分頁元件 */}
             <div className={style.pagenation}>

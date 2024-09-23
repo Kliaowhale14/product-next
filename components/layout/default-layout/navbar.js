@@ -1,93 +1,82 @@
-import React from 'react';
+import React, { useState } from 'react';
+import nav from '@/styles/nav.module.css';
+import Image from 'next/image';
+import Link from 'next/link';
 
 export default function Navbar() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const toggleMenu = () => {
+    setIsMenuOpen((prev) => !prev);
+  };
+
   return (
-    <div>
-      <nav className="navbar navbar-expand-lg navbar-light bg-light">
-        <div className="container-fluid">
-          <a className="navbar-brand" href="#">
-            Navbar
-          </a>
-          <button
-            className="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarSupportedContent"
-            aria-controls="navbarSupportedContent"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
-          >
-            <span className="navbar-toggler-icon"></span>
-          </button>
-          <div className="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-              <li className="nav-item">
-                <a className="nav-link active" aria-current="page" href="#">
-                  Home
-                </a>
+    <>
+      <div className={nav.container}>
+        <nav className={nav.nav}>
+          <li className={nav.logo}>
+            <Image
+              src="/&&LOGO.svg"
+              alt="Logo"
+              width={40}
+              height={40}
+              priority
+            />
+          </li>
+          <ul className={nav.ul}>
+            <li className={nav.li}>
+              購物商城 <div className={nav.little}>shop</div>
+            </li>
+            <li className={nav.li}>
+              預約用餐 <div className={nav.little}>reserve</div>
+            </li>
+            <Link href={`/store/index`}>
+              <li className={nav.li}>
+                門市查詢 <div className={nav.little}>store</div>
               </li>
-              <li className="nav-item">
-                <a className="nav-link" href="#">
-                  Link
-                </a>
-              </li>
-              <li className="nav-item dropdown">
-                <a
-                  className="nav-link dropdown-toggle"
-                  href="#"
-                  id="navbarDropdown"
-                  role="button"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                >
-                  Dropdown
-                </a>
-                <ul className="dropdown-menu" aria-labelledby="navbarDropdown">
-                  <li>
-                    <a className="dropdown-item" href="#">
-                      Action
-                    </a>
-                  </li>
-                  <li>
-                    <a className="dropdown-item" href="#">
-                      Another action
-                    </a>
-                  </li>
-                  <li>
-                    <hr className="dropdown-divider" />
-                  </li>
-                  <li>
-                    <a className="dropdown-item" href="#">
-                      Something else here
-                    </a>
-                  </li>
-                </ul>
-              </li>
-              <li className="nav-item">
-                <a
-                  className="nav-link disabled"
-                  href="#"
-                  tabindex="-1"
-                  aria-disabled="true"
-                >
-                  Disabled
-                </a>
-              </li>
-            </ul>
-            <form className="d-flex">
-              <input
-                className="form-control me-2"
-                type="search"
-                placeholder="Search"
-                aria-label="Search"
-              ></input>
-              <button className="btn btn-outline-success" type="submit">
-                Search
-              </button>
-            </form>
-          </div>
-        </div>
-      </nav>
-    </div>
+            </Link>
+            <li className={nav.li}>
+              關於我們 <div className={nav.little}>about &&</div>
+            </li>
+            <li className={nav.icon}>
+              <Image
+                src="/shopping_cart_light_icon 2.svg"
+                alt="Cart Icon"
+                width={40}
+                height={40}
+                priority
+              />
+            </li>
+            <li className={nav.icon}>
+              <Image
+                src="/user_circle_light_icon 1.svg"
+                alt="User Icon"
+                width={40}
+                height={40}
+                priority
+              />
+            </li>
+            <li className={nav.icon2} onClick={toggleMenu}>
+              <Image
+                src="/list_light_icon 2.svg"
+                alt="Menu Icon"
+                width={40}
+                height={40}
+                priority
+              />
+            </li>
+          </ul>
+        </nav>
+      </div>
+
+      <div className={`${nav.menu} ${isMenuOpen ? nav.open : ''}`}>
+        <ul>
+          <li><Link href="#1">會員中心</Link></li>
+          <li><Link href="#2">購物商城</Link></li>
+          <li><Link href="#3">預約用餐</Link></li>
+          <li><Link href="#3">門市查詢</Link></li>
+        </ul>
+      </div>
+    </>
   );
 }
