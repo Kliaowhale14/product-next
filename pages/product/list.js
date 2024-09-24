@@ -210,8 +210,8 @@ export default function List(item) {
       breeds: breeds.join(','),
       process: process.join(','),
       roast: roast.join(','),
-      pricegte: price_gte, // 會有'0'price_gte
-      pricelte: price_lte,// 會有'0'字串的情況，注意要跳過此條件
+      price_gte: price_gte, // 會有'0'price_gte
+      price_lte: price_lte, // 會有'0'字串的情況，注意要跳過此條件
     };
 
     getProducts(params);
@@ -240,7 +240,7 @@ export default function List(item) {
     } else {
       getProducts(params);
     }
-  }, [page, perpage, sort, order]);
+  }, [page, perpage, sort, order, name_like]);
 
   useEffect(() => {
     if (router.isReady) {
