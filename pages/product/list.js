@@ -88,7 +88,7 @@ export default function List(item) {
       // 設定到狀態中
       // (3.) 設定到狀態後 -> 觸發update(re-render)
       if (resData.status === 'success') {
-        setProducts(resData.data.product);
+        setProducts(resData.data.products);
         setPageCount(resData.data.pageCount);
       }
     } catch (e) {
@@ -185,19 +185,28 @@ export default function List(item) {
       setRoast(nextRoast);
     }
   };
+
   // 分頁元件的頁碼改變時
-  const handlePageClick = (event) => {
-    setPage(event.selected + 1);
+
+  const handleLoadDataType = () => {
+    setPage(1);
+
+    getProductsByTypeID(router.query.type);
+    console.log('123', 123);
   };
 
   const handleLoadData = () => {
+    setPage(1);
+
     // 要送至伺服器的query string參數
     // 註: 重新載入資料需要跳至第一頁
     const params = {
       page: 1, // 跳至第一頁
       perpage,
+      sort: sort,
+      order: order,
       name_like: name_like,
-      countrys: country.join(','),
+      country: country.join(','),
       breeds: breeds.join(','),
       process: process.join(','),
       roast: roast.join(','),
@@ -205,13 +214,7 @@ export default function List(item) {
       pricelte: price_lte,// 會有'0'字串的情況，注意要跳過此條件
     };
 
-    // console.log(params)
-
-    router.push({
-      pathname: router.pathname,
-      query: params,
-    
-    });
+    getProducts(params);
   };
 
   // 樣式2: didMount
@@ -237,19 +240,7 @@ export default function List(item) {
     } else {
       getProducts(params);
     }
-  }, [
-    page,
-    perpage,
-    sort,
-    order,
-    country,
-    breeds,
-    process,
-    roast,
-    price_gte,
-    price_lte,
-    name_like,
-  ]);
+  }, [page, perpage, sort, order]);
 
   useEffect(() => {
     if (router.isReady) {
@@ -258,7 +249,6 @@ export default function List(item) {
       // 向伺服器要求資料
       if (router.query.type) {
         getProductsByTypeID(router.query.type);
-        setPageCount(router.query.type);
       } else {
         // 建立查詢字串用的參數值
         const params = {
@@ -408,7 +398,6 @@ export default function List(item) {
                       })}
                     </AccordionItemPanel>
                   </AccordionItem>
-                  <button onClick={handleLoadData}>搜尋</button>
                 </div>
 
                 <div className={style.filter_block}>
@@ -474,6 +463,11 @@ export default function List(item) {
                 </div>
               </Accordion>
             </div>
+            <button
+              onClick={router.query.type ? handleLoadDataType : handleLoadData}
+            >
+              搜尋
+            </button>
           </div>
           <div>
             <div className={style.order}>
@@ -511,9 +505,12 @@ export default function List(item) {
             <div className={style.pagenation}>
               <BS5Pagination
                 forcePage={page - 1}
-                onPageChange={handlePageClick}
                 pageCount={pageCount}
+                onPageChange={(e) => {
+                  setPage(e.selected + 1);
+                }}
               />
+              <p>筆數{total}</p>
             </div>
           </div>
         </div>

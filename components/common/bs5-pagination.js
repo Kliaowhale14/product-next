@@ -20,7 +20,7 @@ export default function BS5Pagination({ forcePage, onPageChange, pageCount }) {
       nextLinkClassName=""
       breakLabel="..."
       breakClassName="page-item"
-      breakLinkClassName=""
+      breakLinkClassName="pagination"
       containerClassName="pagination"
       activeClassName={style.pageactive}
       renderOnZeroPageCount={null}
