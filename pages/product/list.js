@@ -202,7 +202,7 @@ export default function List(item) {
       process: process.join(','),
       roast: roast.join(','),
       pricegte: price_gte, // 會有'0'price_gte
-      pricelte: price_lte, // 會有'0'字串的情況，注意要跳過此條件
+      pricelte: price_lte,// 會有'0'字串的情況，注意要跳過此條件
     };
 
     // console.log(params)
@@ -210,6 +210,7 @@ export default function List(item) {
     router.push({
       pathname: router.pathname,
       query: params,
+    
     });
   };
 
@@ -272,7 +273,7 @@ export default function List(item) {
           price_gte,
           price_lte,
           name_like,
-        } ;
+        };
 
         // 向伺服器要求資料
         getProducts(params);
