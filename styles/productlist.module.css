@@ -1,4 +1,9 @@
 
+.alldiv{
+  background-color: #1C1B1B;
+}
+
+
 .all{
   width: 1440px;
   margin: auto;
@@ -6,7 +11,7 @@
 .sidebar {
   display: flex;
   flex-direction: column;
-  width: 254px;
+  width: 258px;
   margin: 28.8px auto;
   color: #FFFFFF;
   padding-top: 80px;
@@ -27,12 +32,13 @@
 }
 .fafilter{
 color: #1C1B1B;
-font-size: 18px;
-margin: 10px;
+font-size: 16px;
+margin: 15px;
 border: none;
 }
 
 .filter_btn{
+  font-size: 18px;
   display: flex;
   font-size: 20px;
   line-height: 40px;
@@ -148,11 +154,13 @@ border: none;
 
 .card{
   position: relative;
-  border-radius: 9px;
-  padding: 12px 9px;
+  border-radius: 10px;
+  padding: 1rem;
   background-color: #FFFFFF;
   text-decoration: none;
-  height: 280px;
+  text-align: center;
+  height:320px; 
+
   
 }
 
@@ -165,15 +173,15 @@ position:relative;
 
 .cardimg{
   width: 100%;
-  height: 150px;
+  height: 70%;
 }
 
 .cardtitle{
   display: grid;
   flex-wrap: wrap;
-  font-size: 17px;
+  font-size: 15px;
   color: #1C1B1B;
-  margin: 3px;
+  margin-top: 0.6rem;
   
 }
 
@@ -397,7 +405,7 @@ margin-bottom: 30px;
       margin: auto;
     }
     .cardimg{
-      width: 132px;
+      width: 100%;
       height: 90px;
       margin: auto;
     }
@@ -422,5 +430,17 @@ margin-bottom: 30px;
     .pagenation a{
       font-size: 16px;
     }
-
+.wrong_msg{
+  margin: 40px;
+  width: 300px;
+  font-size: 20px;
+}
+.context2{
+  width: 375px;
+  display: grid;
+  grid-template-columns: repeat(2, 160px);
+  margin: 0;
+  gap:15px;
+  flex-wrap: wrap;
+}
   }
